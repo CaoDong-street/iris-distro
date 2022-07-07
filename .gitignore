@@ -4,5 +4,9 @@ pod-build
 .DS_Store
 *.pyc
 build/
+.catkin_tools/
+.vscode/
+devel/
+logs/
 externals_config.cmake
 iris_wrapper.py
