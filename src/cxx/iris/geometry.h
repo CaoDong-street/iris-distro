@@ -19,6 +19,10 @@ public:
   const Eigen::MatrixXd& getA() const;
   void setB(const Eigen::VectorXd &b);
   const Eigen::VectorXd& getB() const;
+  void setn(const Eigen::MatrixXd &n);
+  const Eigen::MatrixXd& getn() const;
+  void setp(const Eigen::MatrixXd &p);
+  const Eigen::MatrixXd& getp() const;
   int getDimension() const;
   int getNumberOfConstraints() const;
   void appendConstraints(const Polyhedron &other);
@@ -29,6 +33,8 @@ public:
 private:
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
+  Eigen::MatrixXd n_show_;
+  Eigen::MatrixXd p_show_;
   bool dd_representation_dirty_;
   std::vector<Eigen::VectorXd> generator_points_;
   std::vector<Eigen::VectorXd> generator_rays_;

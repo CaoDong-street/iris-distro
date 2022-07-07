@@ -14,6 +14,11 @@ def test_random_obstacles_3d(show=False):
         start = np.array([0.5, 0.5, 0.5])
 
     region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)
+    print(region.getPolyhedron().getA())
+    print(region.getPolyhedron().getB())
+    print(region.getPolyhedron().generatorPoints())
+    print(region.getPolyhedron().getn())
+    print(region.getPolyhedron().getp())
 
     debug.animate(pause=0.5, show=show)
 

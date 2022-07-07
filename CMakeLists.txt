@@ -9,14 +9,14 @@ if(APPLE AND POLICY CMP0042)
 endif()
 
 # Set the default build type.
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING
-    "Choose the type of build; options are Debug Release RelWithDebInfo MinSizeRel."
-    FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    Debug Release RelWithDebInfo MinSizeRel)
-endif()
-
+#if(NOT CMAKE_BUILD_TYPE AND NOT  )
+#  set(CMAKE_BUILD_TYPE Release CACHE STRING
+#    "Choose the type of build; options are Debug Release RelWithDebInfo MinSizeRel."
+#    FORCE)
+#  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+#    Debug Release RelWithDebInfo MinSizeRel)
+#endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 # Set the default installation prefix.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE STRING
@@ -25,7 +25,7 @@ endif()
 
 option(BUILD_TESTING "Build the testing tree." ON)
 option(IRIS_WITH_EIGEN
-  "C++ matrix library. Only disable if you have this already." ON)
+  "C++ matrix library. Only disable if you have this already." OFF)
 option(IRIS_WITH_MOSEK
   "Convex optimization solver; free for academics. Only disable if you have this already."
   ON)
@@ -82,8 +82,7 @@ if(IRIS_WITH_CDD)
 
   ExternalProject_Add(cdd
     DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/cdd-download"
-    URL https://d2tbce6hkathzp.cloudfront.net/other/cddlib/cddlib-094h.tar.gz
-    URL_HASH SHA256=fe6d04d494683cd451be5f6fe785e147f24e8ce3ef7387f048e739ceb4565ab5
+    URL https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/cddlib/094h-1/cddlib_094h.orig.tar.gz
     TLS_VERIFY 1
     SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cdd-src"
     PATCH_COMMAND "${PATCH_EXECUTABLE}" -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/cdd.patch"

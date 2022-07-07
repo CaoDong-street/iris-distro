@@ -36,7 +36,7 @@ class InnerEllipsoidInfeasibleError: public std::exception {
 double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *ellipsoid, MSKenv_t *existing_env=NULL);
 
 void closest_point_in_convex_hull(const Eigen::MatrixXd &Points, Eigen::VectorXd &result, MSKenv_t *existing_env=NULL);
-
+//判断是否正确完成指令
 void check_res(MSKrescodee res);
 
 }

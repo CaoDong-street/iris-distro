@@ -6,9 +6,9 @@
 using namespace Eigen;
 
 namespace iris_mosek {
-
+//累加
 #define ADD_VAR(x) std::vector<int> ndx_##x (num_##x); for (int i=0; i < num_##x; i++) ndx_##x[i] = nvar++;
-
+//检测结果是否成功
 void check_res(MSKrescodee res) {
   if (res != MSK_RES_OK) {
     throw IRISMosekError(res);
@@ -71,26 +71,26 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
   ADD_VAR(f)
   ADD_VAR(g)
 
-  const int ncon = n * m + m + n + n + (pow(2, l) - n) + 1 + (n * (n-1) / 2) + (pow(2, l) - 1);
+  const int ncon = n * m + m + n + n + (pow(2, l) - n) + 1 + (n * (n-1) / 2) + (pow(2, l) - 1);//约束的总数
 
-  const int nabar = n * m * n + n + n + (n * (n-1) / 2);
+  const int nabar = n * m * n + n + n + (n * (n-1) / 2);//nabar的非零元素数
   int abar_ndx = 0;
 
 
-  check_res(MSK_maketask(*env, ncon, 0, &task));
+  check_res(MSK_maketask(*env, ncon, 0, &task));//创建任务
 
   #ifndef NDEBUG
     /* Directs the log task stream to the 'printstr' function. */ 
     check_res(MSK_linkfunctotaskstream(task,MSK_STREAM_LOG,NULL,printstr));
   #endif
 
-  check_res(MSK_appendcons(task, ncon));
+  check_res(MSK_appendcons(task, ncon));//将约束添加入问题
 
-  check_res(MSK_appendvars(task, nvar));
+  check_res(MSK_appendvars(task, nvar));//将变量添加入问题
 
   MSKint32t dim_bar[] = {2*n};
   MSKint32t len_bar[] = {(dim_bar[0] * (dim_bar[0] + 1)) / 2};
-  check_res(MSK_appendbarvars(task, 1, dim_bar));
+  check_res(MSK_appendbarvars(task, 1, dim_bar));//设定半定矩阵变量维度
 
   check_res(MSK_putcj(task, ndx_t[0], 1.0));
 
@@ -103,7 +103,7 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
   std::vector<MSKint32t> bara_k(nabar);
   std::vector<MSKint32t> bara_l(nabar);
   std::vector<MSKrealt> bara_v(nabar);
-
+//第一项：存储f
   int con_ndx = 0;
   std::vector<MSKint32t> subi_A_row(num_d + 1);
   std::vector<MSKrealt> vali_A_row(num_d + 1);
@@ -127,22 +127,22 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
       abar_ndx += n;
       MSKint32t subi[] = {ndx_f[i + m * j]};
       MSKrealt vali[] = {-1};
-      check_res(MSK_putarow(task, con_ndx, 1, subi, vali));
-      check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));
+      check_res(MSK_putarow(task, con_ndx, 1, subi, vali));//设置约束矩阵A的列 
+      check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));//更改一个线性约束的边界
 
       con_ndx++;
-    }
+    }//第二项
     for (int j=0; j < num_d; j++) {
       subi_A_row[j] = ndx_d[j];
       vali_A_row[j] = polyhedron.getA()(i, j);
     }
     subi_A_row[num_d] = ndx_g[i];
     vali_A_row[num_d] = 1;
-    check_res(MSK_putarow(task, con_ndx, num_d + 1, subi_A_row.data(), vali_A_row.data()));
-    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, polyhedron.getB()(i, 0), polyhedron.getB()(i, 0)));
+    check_res(MSK_putarow(task, con_ndx, num_d + 1, subi_A_row.data(), vali_A_row.data()));//设置约束矩阵A的列 
+    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, polyhedron.getB()(i, 0), polyhedron.getB()(i, 0)));//更改一个线性约束的边界
     con_ndx++;
   }
-
+//第三项，构建半定矩阵
   for (int j=0; j < n; j++) {
     // Xbar_{n+j,j} == z_j
     bara_i[abar_ndx] = con_ndx;
@@ -154,8 +154,8 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
 
     MSKint32t subi[] = {ndx_z[j]};
     MSKrealt vali[] = {-1};
-    check_res(MSK_putarow(task, con_ndx, 1, subi, vali));
-    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));
+    check_res(MSK_putarow(task, con_ndx, 1, subi, vali));//设置约束矩阵A的列 
+    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));//更改一个线性约束的边界
     con_ndx++;
   }
 
@@ -170,8 +170,8 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
 
     MSKint32t subi[] = {ndx_z[j]};
     MSKrealt vali[] = {-1};
-    check_res(MSK_putarow(task, con_ndx, 1, subi, vali));
-    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));
+    check_res(MSK_putarow(task, con_ndx, 1, subi, vali));//设置约束矩阵A的列 
+    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));//更改一个线性约束的边界
     con_ndx++;
   }
 
@@ -179,12 +179,12 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
   for (int j=n; j < num_z; j++) {
     MSKint32t subi[] = {ndx_z[j], ndx_t[0]};
     MSKrealt vali[] = {1, -1};
-    check_res(MSK_putarow(task, con_ndx, 2, subi, vali));
-    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));
+    check_res(MSK_putarow(task, con_ndx, 2, subi, vali));//设置约束矩阵A的列 
+    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));//更改一个线性约束的边界
     con_ndx++;
   }
 
-  // Off-diagonal elements of Y22 are 0
+  // Off-diagonal elements of Y22 are 0，化为对角矩阵
   for (int k=n; k < 2*n; k++) {
     for (int l=n; l < k; l++) {
       bara_i[abar_ndx] = con_ndx;
@@ -194,14 +194,14 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
       bara_v[abar_ndx] = 1;
       abar_ndx++;
 
-      check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));
+      check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, 0, 0));//更改一个线性约束的边界
 
       con_ndx++;
     }
   }
 
   assert(abar_ndx == nabar);
-
+//第四项
   // 2^(l/2)t == s_{2l - 1}
   MSKint32t subi[] = {ndx_t[0], ndx_s[num_s - 1]};
   MSKrealt vali[] = {pow(2, l / 2.0), -1};
@@ -219,7 +219,7 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
   }
 
   assert(con_ndx == ncon);
-
+//第五项，决定椭圆面积
   MSKint32t csub[3];
   int lhs_idx = 0;
   // printf("l: %d num_s: %d num_z: %d num_sprime: %d\n", l, num_s, num_z, num_sprime);
@@ -242,7 +242,7 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
     check_res(MSK_appendcone(task, MSK_CT_RQUAD, 0.0, 3, csub)); // 3rd argument (0.0) is reserved for future use by Mosek
     lhs_idx += 2;
   }
-
+//第六项，实现不等式
   std::vector<MSKint32t> csub_f_row(1 + n);
   for (int i=0; i < m; i++) {
     csub_f_row[0] = ndx_g[i];
@@ -254,16 +254,16 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
 
   // Divide all off-diagonal entries of Abar by 2. This is necessary because Abar
   // is assumed by the solver to be a symmetric matrix, but we're only setting
-  // its lower triangular part.
+  // its lower triangular part.非对角线元素除以2
   for (int i=0; i < nabar; i++) {
     if (bara_k[i] != bara_l[i]) {
       bara_v[i] /= 2.0;
     }
   }
 
-  check_res(MSK_putbarablocktriplet(task, nabar, bara_i.data(), bara_j.data(), bara_k.data(), bara_l.data(), bara_v.data()));
+  check_res(MSK_putbarablocktriplet(task, nabar, bara_i.data(), bara_j.data(), bara_k.data(), bara_l.data(), bara_v.data()));//创建正定矩阵在约束中的系数矩阵
 
-  check_res(MSK_putobjsense(task, MSK_OBJECTIVE_SENSE_MAXIMIZE));
+  check_res(MSK_putobjsense(task, MSK_OBJECTIVE_SENSE_MAXIMIZE));//设置优化目标
   
   // #ifndef NDEBUG
   //   for (int i=0; i < 16; i++) {
@@ -294,18 +294,18 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
   check_res(res);
 
   MSKsolstae solsta;
-  MSK_getsolsta(task, MSK_SOL_ITR, &solsta);
+  MSK_getsolsta(task, MSK_SOL_ITR, &solsta);//返回解的状态
 
   switch(solsta) {
     case MSK_SOL_STA_OPTIMAL:
     case MSK_SOL_STA_NEAR_OPTIMAL:
-      xx = (double *) MSK_calloctask(task, nvar, sizeof(MSKrealt));
-      barx = (double *) MSK_calloctask(task, len_bar[0], sizeof(MSKrealt));
+      xx = (double *) MSK_calloctask(task, nvar, sizeof(MSKrealt));//分配解向量大小
+      barx = (double *) MSK_calloctask(task, len_bar[0], sizeof(MSKrealt));//分配解半定矩阵大小
 
-      MSK_getxx(task, MSK_SOL_ITR, xx);
-      MSK_getbarxj(task, MSK_SOL_ITR, 0, barx);
+      MSK_getxx(task, MSK_SOL_ITR, xx);//得到解向量
+      MSK_getbarxj(task, MSK_SOL_ITR, 0, barx);//得到解半定矩阵
 
-      extract_solution(xx, barx, n, ndx_d, ellipsoid);
+      extract_solution(xx, barx, n, ndx_d, ellipsoid);//返回C和d给矩阵
 
       // debug("Optimal primal solution"); 
       // #ifndef NDEBUG

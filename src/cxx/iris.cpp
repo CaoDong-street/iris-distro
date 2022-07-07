@@ -19,6 +19,16 @@ std::vector<size_t> arg_sort(const std::vector<T> &vec) {
 }
 
 typedef std::pair<Eigen::VectorXd, double> hyperplane;
+typedef std::pair<Eigen::VectorXd, Eigen::VectorXd> hyperplane_show;
+
+hyperplane_show tangent_plane_show_through_point(const Ellipsoid &ellipsoid, const Eigen::MatrixXd &Cinv2, const Eigen::VectorXd &x) {
+  Eigen::VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.getD())).normalized();
+  std::pair<Eigen::VectorXd, Eigen::VectorXd> plane_show(nhat,
+                                    x);
+  // std::cout << "tangent plane through point: " << x.transpose() << std::endl;
+  // std::cout << plane.first.transpose() << " | " << plane.second << std::endl;
+  return plane_show;
+}
 
 hyperplane tangent_plane_through_point(const Ellipsoid &ellipsoid, const Eigen::MatrixXd &Cinv2, const Eigen::VectorXd &x) {
   Eigen::VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.getD())).normalized();
@@ -77,7 +87,8 @@ void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, con
   std::vector<size_t> obs_sort_idx = arg_sort(obs_min_squared_image_dists);
 
   std::vector<std::pair<Eigen::VectorXd, double>> planes;
-
+  std::vector<std::pair<Eigen::VectorXd, Eigen::VectorXd>> planes_show;
+  
   MSKenv_t env = NULL;
   for (auto it = obs_sort_idx.begin(); it != obs_sort_idx.end(); ++it) {
     size_t i = *it;
@@ -87,9 +98,13 @@ void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, con
     Eigen::DenseIndex idx;
     image_squared_dists[i].minCoeff(&idx);
     hyperplane plane = tangent_plane_through_point(ellipsoid, Cinv2, obstacle_pts[i].col(idx));
+    hyperplane_show plane_show = tangent_plane_show_through_point(ellipsoid, Cinv2, obstacle_pts[i].col(idx));
+    //std::cout << "plane: " << std::endl << plane.first << std::endl ;
+    //std::cout << "plane_show: " << std::endl<< plane_show.first<< std::endl;
     if ((((plane.first.transpose() * obstacle_pts[i]).array() - plane.second) >= 0).all()) {
       // nhat already separates the ellipsoid from obstacle i, so we can skip the optimization
       planes.push_back(plane);
+      planes_show.push_back(plane_show);
     } else {
       Eigen::VectorXd ystar(dim);
       choose_closest_point_solver(image_pts[i], ystar, env);
@@ -99,9 +114,11 @@ void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, con
         // ellipsoid out of the obstacle.
         infeasible_start = true;
         planes.emplace_back(-plane.first, -plane.first.transpose() * obstacle_pts[i].col(idx));
+        planes_show.push_back(plane_show);
       } else {
         Eigen::VectorXd xstar = ellipsoid.getC() * ystar + ellipsoid.getD();
         planes.push_back(tangent_plane_through_point(ellipsoid, Cinv2, xstar));
+        planes_show.push_back(tangent_plane_show_through_point(ellipsoid, Cinv2, xstar));
       }
     }
 
@@ -123,13 +140,21 @@ void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, con
   // b.resize(planes.size(), 1);
   Eigen::MatrixXd A(planes.size(), dim);
   Eigen::VectorXd b(planes.size());
+  Eigen::MatrixXd n_show(planes_show.size(), dim);
+  Eigen::MatrixXd p_show(planes_show.size(), dim);
 
   for (auto it = planes.begin(); it != planes.end(); ++it) {
     A.row(it - planes.begin()) = it->first.transpose();
     b(it - planes.begin()) = it->second;
   }
+      for (auto it = planes_show.begin(); it != planes_show.end(); ++it) {
+    n_show.row(it - planes_show.begin()) = it->first.transpose();
+    p_show.row(it - planes_show.begin()) = it->second.transpose();
+  }
   polyhedron.setA(A);
   polyhedron.setB(b);
+  polyhedron.setn(n_show);
+  polyhedron.setp(p_show);
 
   return;
 }

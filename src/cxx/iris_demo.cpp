@@ -26,5 +26,9 @@ int main(int argc, char** argv) {
 
   std::cout << "C: " << region.ellipsoid.getC() << std::endl;
   std::cout << "d: " << region.ellipsoid.getD() << std::endl;
+  std::cout << "A: " << region.polyhedron.getA() << std::endl;
+  std::cout << "B: " << region.polyhedron.getB() << std::endl;
+  std::cout << "n: " << region.polyhedron.getn() << std::endl;
+  std::cout << "p: " << region.polyhedron.getp() << std::endl;
   return 0;
 }

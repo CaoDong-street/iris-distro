@@ -13,15 +13,15 @@ if(APPLE)
   endif()
 endif()
 
-include(CMakePackageConfigHelpers)
-include(CTest)
-include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)#助手函数用于创建配置文件
+include(CTest)#CMake集成的一个测试工具
+include(GNUInstallDirs)#提供GNU编码标准定义的安装目录变量
 
-list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
+list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")#定义自己的cmake模块所在路径
 
-find_package(pybind11 CONFIG REQUIRED)
-find_package(Mosek CONFIG REQUIRED)
-find_package(NumPy MODULE REQUIRED)
+find_package(pybind11 CONFIG REQUIRED)#CONFIG模式搜索包
+find_package(Mosek CONFIG REQUIRED)#CONFIG模式搜索包
+find_package(NumPy MODULE REQUIRED)#Module模式搜索包
 
 # Newer versions of Eigen 3 define imported targets in their package
 # configuration files, so try to locate such a file before using the legacy
@@ -32,7 +32,7 @@ if(NOT Eigen3_FOUND)
   find_package(Eigen3 MODULE REQUIRED)
 endif()
 
-find_library(CDD_LIBRARY NAMES cdd)
+find_library(CDD_LIBRARY NAMES cdd)#搜索库
 
 if(NOT CDD_LIBRARY)
   message(FATAL_ERROR "Could NOT find cdd")
@@ -44,10 +44,11 @@ if(NOT CDD_INCLUDE_DIR)
   message(FATAL_ERROR "Could NOT find cdd.h")
 endif()
 
-# Set RPATH for installed binaries.
+# Set RPATH for installed binaries.运行二进制文件时库的搜索目录
 set(CMAKE_INSTALL_RPATH
   "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
   "${CMAKE_INSTALL_PREFIX}/lib")
+  #CMAKE_INSTALL_LIBDIR：这将扩展到目标代码库(即静态库和动态库)所在的子目录。在64位系统上，它是 lib64 ，而在32位系统上，它只是 lib 。
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
 
 list(REMOVE_DUPLICATES CMAKE_INSTALL_RPATH)
@@ -140,11 +141,11 @@ set(IRIS_LIBRARY_DIR ${CMAKE_INSTALL_LIBDIR})
 set(IRIS_PYTHON_DIR
   ${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages)
 
-add_subdirectory(cxx)
-add_subdirectory(python)
+add_subdirectory(cxx)#添加一个子目录并构建该子目录
+add_subdirectory(python)#添加一个子目录并构建该子目录
 
 if(WITH_MATLAB)
   add_subdirectory(matlab)
 endif()
 
-install(FILES license.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
+install(FILES license.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})#install到指定的install目录

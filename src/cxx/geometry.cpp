@@ -75,6 +75,18 @@ void Polyhedron::setA(const Eigen::MatrixXd &A) {
 const Eigen::MatrixXd& Polyhedron::getA() const {
   return A_;
 }
+void Polyhedron::setn(const Eigen::MatrixXd &n) {
+  n_show_ = n;
+}
+const Eigen::MatrixXd& Polyhedron::getn() const {
+  return n_show_;
+}
+void Polyhedron::setp(const Eigen::MatrixXd &p) {
+  p_show_ = p;
+}
+const Eigen::MatrixXd& Polyhedron::getp() const {
+  return p_show_;
+}
 void Polyhedron::setB(const Eigen::VectorXd &b) {
   b_ = b;
   dd_representation_dirty_ = true;

@@ -18,10 +18,12 @@ def testInterface(show=False):
     problem.setSeedPoint(np.array([0.0, 0.0]))
     problem.addObstacle(np.array([[1.5, 2], [1.5, 2]]))
     region = irispy.iris_wrapper.inflate_region(problem, irispy.IRISOptions())
-    print(region)
+    print(region.getPolyhedron().getA())
+    print(region.getPolyhedron().getB())
+    print(region.getPolyhedron().generatorRays())
     print(region.getPolyhedron().generatorPoints())
-    print(region.getEllipsoid().getC())
-    print(region.getEllipsoid().getD())
+    # print(region.getEllipsoid().getC())
+    # print(region.getEllipsoid().getD())
 
     import matplotlib.pyplot as plt
     region.polyhedron.draw2d()
