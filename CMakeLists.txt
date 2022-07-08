@@ -9,13 +9,13 @@ if(APPLE AND POLICY CMP0042)
 endif()
 
 # Set the default build type.
-#if(NOT CMAKE_BUILD_TYPE AND NOT  )
-#  set(CMAKE_BUILD_TYPE Release CACHE STRING
-#    "Choose the type of build; options are Debug Release RelWithDebInfo MinSizeRel."
-#    FORCE)
-#  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-#    Debug Release RelWithDebInfo MinSizeRel)
-#endif()
+if(NOT CMAKE_BUILD_TYPE AND NOT  )
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
+    "Choose the type of build; options are Debug Release RelWithDebInfo MinSizeRel."
+    FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    Debug Release RelWithDebInfo MinSizeRel)
+endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 # Set the default installation prefix.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
