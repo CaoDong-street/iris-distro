@@ -7,16 +7,16 @@ if(APPLE AND POLICY CMP0042)
   # MACOSX_RPATH is enabled by default.
   cmake_policy(SET CMP0042 NEW)
 endif()
-
+#set(CMAKE_BUILD_TYPE DEBUG)
 # Set the default build type.
-if(NOT CMAKE_BUILD_TYPE AND NOT  )
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release CACHE STRING
     "Choose the type of build; options are Debug Release RelWithDebInfo MinSizeRel."
     FORCE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     Debug Release RelWithDebInfo MinSizeRel)
 endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+
 # Set the default installation prefix.
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE STRING
