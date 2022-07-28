@@ -101,11 +101,30 @@ int Polyhedron::getNumberOfConstraints() const {
   return A_.rows();
 }
 void Polyhedron::appendConstraints(const Polyhedron &other) {
+  Eigen::MatrixXd p_add(other.getA().rows(),p_show_.cols());
+  for (int i = 0; i < p_add.rows(); i++)
+  {
+    for (int j = 0; j< p_add.cols(); j++)
+    {
+      if(other.getA()(i,j)!=0){
+          p_add(i,j)=other.getB()(i)/other.getA()(i,j);
+      }
+      else
+      {
+          p_add(i,j)=0;
+      }
+    }
+  }
   A_.conservativeResize(A_.rows() + other.getA().rows(), A_.cols());
   A_.bottomRows(other.getA().rows()) = other.getA();
   b_.conservativeResize(b_.rows() + other.getB().rows());
   b_.tail(other.getB().rows()) = other.getB();
+  n_show_.conservativeResize(n_show_.rows() + other.getA().rows(), n_show_.cols());
+  n_show_.bottomRows(other.getA().rows()) = other.getA();
+  p_show_.conservativeResize(p_show_.rows() + p_add.rows(), p_show_.cols());
+  p_show_.bottomRows(p_add.rows()) = p_add;
   dd_representation_dirty_ = true;
+
 }
 void Polyhedron::updateDDRepresentation() {
   generator_points_.clear();
